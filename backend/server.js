@@ -9,8 +9,6 @@ const APP = EXPRESS();
 const SERVER = HTTP.createServer(APP);
 const IO = new Server(SERVER, { cors: { origin: "*" } });
 
-const isValidObjectId = (s) => /^[a-fA-F0-9]{24}$/.test(s);
-
 APP.use(CORS());
 APP.use(EXPRESS.json());
 
@@ -39,6 +37,18 @@ async function pushResults(pollId) {
 	IO.to(`poll:${pollId}`).emit("results:update", { pollId, series });
 }
 
+const isValidObjectId = (s) => /^[a-fA-F0-9]{24}$/.test(s);
+
+async function checkPollExpiration(poll) {
+	if (!poll || !poll.expires_at) return poll;
+	const now = new Date();
+	if (now > poll.expires_at && poll.status === "live") {
+		await collection("polls").updateOne({ _id: poll._id }, { $set: { status: "closed" } });
+		poll.status = "closed";
+	}
+	return poll;
+}
+
 IO.on("connection", (socket) => {
 	console.log("socket connected", socket.id);
 	socket.on("join-poll", ({ pollId }) => {
@@ -59,34 +69,49 @@ IO.on("connection", (socket) => {
 });
 
 APP.post("/polls", async (request, response) => {
-	const { title, options } = request.body;
-	if (!title || !Array.isArray(options) || !options.length) {
+	const { title, options, duration } = request.body;
+
+	if (!title || !Array.isArray(options) || !options.length)
 		return response.status(400).json({ error: "title and options are required" });
-	}
+
+	const now = new Date();
+	const expiresAt = duration ? new Date(now.getTime() + duration * 60000) : null;
 
 	const doc = {
 		title,
 		status: "live",
 		options: options.map((label) => ({ _id: new ObjectId(), label })),
-		created_at: new Date(),
+		created_at: now,
+		expires_at: expiresAt,
 	};
 
 	const { insertedId } = await collection("polls").insertOne(doc);
-	return response.status(201).json({ poll_id: String(insertedId) });
+	response.status(201).json({ poll_id: String(insertedId) });
 });
 
 APP.get("/polls/:id", async (request, response) => {
-	const { id } = request.params;
-	if (!isValidObjectId(id)) return response.status(400).json({ error: "invalid poll id" });
+  const { id } = request.params;
+  if (!isValidObjectId(id))
+    return response.status(400).json({ error: "invalid poll id" });
 
-	const _id = new ObjectId(id);
-	const poll = await collection("polls").findOne({ _id });
-	if (!poll) return response.status(404).json({ error: "Poll not found" });
+  const _id = new ObjectId(id);
+  let poll = await collection("polls").findOne({ _id });
+  if (!poll) return response.status(404).json({ error: "Poll not found" });
 
-	response.json({
-		poll: { id: String(poll._id), title: poll.title, status: poll.status },
-		options: poll.options.map((o) => ({ id: String(o._id), label: o.label })),
-	});
+  poll = await checkPollExpiration(poll);
+
+  response.json({
+    poll: {
+      id: String(poll._id),
+      title: poll.title,
+      status: poll.status,
+      expires_at: poll.expires_at,
+    },
+    options: poll.options.map((o) => ({
+      id: String(o._id),
+      label: o.label,
+    })),
+  });
 });
 
 APP.get("/polls/:id/results", async (request, response) => {
@@ -117,12 +142,12 @@ APP.post("/votes", async (request, response) => {
 	}
 
 	const poll = await collection("polls").findOne({ _id: new ObjectId(poll_id) });
-	if (!poll || poll.status !== "live") {
-		return response.status(400).json({ error: "Poll not found or not live" });
-	}
+	await checkPollExpiration(poll);
 
 	const valid = poll.options.some((option) => String(option._id) === option_id);
 	if (!valid) return response.status(400).json({ error: "Invalid option_id" });
+
+	if (!poll || poll.status !== "live") return response.status(400).json({ error: "Poll not found or not live" });
 
 	try {
 		await collection("votes").insertOne({
@@ -177,7 +202,7 @@ APP.get("/polls/:id/results", async (request, response) => {
 })();
 
 APP.use((err, request, response, next) => {
-  console.error(err);
-  if (response.headersSent) return next(err);
-  response.status(500).json({ error: "Server error" });
+	console.error(err);
+	if (response.headersSent) return next(err);
+	response.status(500).json({ error: "Server error" });
 });

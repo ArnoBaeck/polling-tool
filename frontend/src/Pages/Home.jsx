@@ -22,7 +22,7 @@ export default function Home() {
   return (
     <main className="home">
       <section className="home__card">
-        <h1>Routes testen</h1>
+        <h1>Join/maak poll</h1>
         <p>Voer een bestaand poll id in en navigeer.</p>
         <form className="home__form">
           <input
