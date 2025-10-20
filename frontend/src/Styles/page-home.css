@@ -1,0 +1,6 @@
+.home { display: grid; place-items: start center; }
+.home__card { width: 100%; max-width: 720px; background: var(--panel); border: 1px solid var(--track); border-radius: 12px; padding: 20px; }
+.home__form { display: grid; gap: 12px; margin-top: 12px; }
+.home__input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--track); background: #0e1116; color: var(--text); }
+.home__actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.home__hint { color: var(--muted); margin-top: 8px; }

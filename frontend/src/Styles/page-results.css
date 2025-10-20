@@ -1,0 +1,7 @@
+.results { display: grid; place-items: start center; }
+.results__bars { list-style: none; padding: 0; display: grid; gap: 12px; margin-top: 12px; }
+.results__bar { display: grid; gap: 6px; }
+.results__bar-label { display: flex; justify-content: space-between; font-size: 14px; color: var(--text); }
+.results__bar-track { height: 10px; background: var(--track); border-radius: 999px; overflow: hidden; }
+.results__bar-fill { height: 100%; background: var(--primary); }
+.results__actions { margin-top: 16px; }

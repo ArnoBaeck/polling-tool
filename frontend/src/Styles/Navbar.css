@@ -1,6 +1,14 @@
-nav {
-	display: flex;
-	justify-content: flex-end;
-	gap: 20px;
-	width: 100%;
+.nav {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(11,12,15,0.7);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--track);
 }
+.nav__inner {
+  max-width: 1100px; margin: 0 auto; padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav__brand { font-weight: 700; }
+.nav__links { display: flex; gap: 12px; }
+.nav__link { padding: 6px 10px; border-radius: 6px; }
+.nav__link.active { background: var(--panel); border: 1px solid var(--track); }

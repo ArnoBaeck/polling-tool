@@ -1,11 +1,10 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-
-const API = import.meta.env.VITE_API_URL || "http://localhost:8080";
+import { API } from "../lib/api";
+import "../Styles/page-create.css";
 
 export default function CreatePoll() {
   const navigate = useNavigate();
-
   const [title, setTitle] = useState("");
   const [options, setOptions] = useState(["", ""]);
   const [submitting, setSubmitting] = useState(false);
@@ -39,13 +38,11 @@ export default function CreatePoll() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-
     const cleanOptions = options.map(o => o.trim()).filter(Boolean);
     if (!title.trim() || cleanOptions.length < 2) {
       setError("Vul een titel in en minstens 2 opties.");
       return;
     }
-
     try {
       setSubmitting(true);
       const res = await fetch(`${API}/polls`, {
@@ -53,13 +50,9 @@ export default function CreatePoll() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: title.trim(), options: cleanOptions }),
       });
-
-      const text = await res.text();
-      if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
-
-      const data = JSON.parse(text || "{}");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
       if (!data.poll_id) throw new Error("poll_id ontbreekt in server response.");
-
       navigate(`/vote/${data.poll_id}`);
     } catch (err) {
       setError(err.message || "Er ging iets mis bij het aanmaken.");
@@ -69,13 +62,14 @@ export default function CreatePoll() {
   }
 
   return (
-    <div>
-      <h1>Nieuwe Poll</h1>
+    <main className="create">
+      <form className="create__form" onSubmit={handleSubmit}>
+        <h1>Nieuwe Poll</h1>
 
-      <form onSubmit={handleSubmit}>
-        <label>
-          Titel:
+        <label className="create__label">
+          <span>Titel</span>
           <input
+            className="create__input"
             type="text"
             placeholder="Bijv. Wat eten we vanavond?"
             value={title}
@@ -83,31 +77,33 @@ export default function CreatePoll() {
           />
         </label>
 
-        <h3>Opties:</h3>
-        {options.map((opt, i) => (
-          <div key={i}>
-            <input
-              type="text"
-              placeholder={`Optie ${i + 1}`}
-              value={opt}
-              onChange={(e) => updateOption(i, e.target.value)}
-            />
-            <button type="button" onClick={() => removeOption(i)}>
-              Verwijderen
-            </button>
-          </div>
-        ))}
+        <div className="create__options">
+          <h3>Opties</h3>
+          {options.map((opt, i) => (
+            <div className="create__option-row" key={i}>
+              <input
+                className="create__input"
+                type="text"
+                placeholder={`Optie ${i + 1}`}
+                value={opt}
+                onChange={(e) => updateOption(i, e.target.value)}
+              />
+              <button type="button" onClick={() => removeOption(i)} className="btn--ghost">
+                Verwijderen
+              </button>
+            </div>
+          ))}
+          <button type="button" onClick={addOption} className="btn--ghost">
+            + Optie toevoegen
+          </button>
+        </div>
 
-        <button type="button" onClick={addOption}>
-          + Optie toevoegen
-        </button>
+        {error && <p className="form__error">{error}</p>}
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
-
-        <button type="submit" disabled={!canSubmit}>
+        <button className="btn--primary" type="submit" disabled={!canSubmit}>
           {submitting ? "Aanmaken..." : "Poll aanmaken"}
         </button>
       </form>
-    </div>
+    </main>
   );
 }

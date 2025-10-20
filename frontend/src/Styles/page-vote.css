@@ -1,0 +1,5 @@
+.vote { display: grid; place-items: start center; }
+.vote__card { }
+.vote__options { list-style: none; padding: 0; display: grid; gap: 8px; margin: 16px 0 0; }
+.vote__row { display: flex; align-items: center; gap: 10px; }
+.vote__meta { color: var(--muted); }

@@ -1,14 +1,19 @@
 // REACT IMPORTS
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
-// STYLES IMPORTS
+// STYLE IMPORTS
 import "../Styles/navbar.css";
 
 export default function Navbar() {
-	return (
-		<nav>
-			<Link to="/">Home</Link>
-			<Link to="/create">Create Poll</Link>
-		</nav>
-	);
+  return (
+    <header className="nav">
+      <div className="nav__inner">
+        <Link className="nav__brand" to="/">Polling Tool</Link>
+        <nav className="nav__links">
+          <NavLink to="/" className="nav__link">Home</NavLink>
+          <NavLink to="/create" className="nav__link">Create</NavLink>
+        </nav>
+      </div>
+    </header>
+  );
 }

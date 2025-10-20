@@ -1,0 +1,4 @@
+.details { display: grid; place-items: start center; }
+.details__card { }
+.details__list { list-style: none; padding: 0; margin: 8px 0 16px; display: grid; gap: 6px; }
+.details__actions { display: flex; gap: 8px; }

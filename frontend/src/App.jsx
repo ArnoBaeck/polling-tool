@@ -1,28 +1,28 @@
 // REACT IMPORTS
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
-// PAGES IMPORTS
+// COMPONENT IMPORTS
+import NavBar from "./Components/NavBar";
+
+// PAGE IMPORTS
 import Home from "./Pages/Home";
 import CreatePoll from "./Pages/CreatePoll";
+import PollDetails from "./Pages/PollDetails";
 import VotePoll from "./Pages/VotePoll";
 import PollResults from "./Pages/PollResults";
 
-// COMPONENTS IMPORTS
-import Navbar from "./Components/Navbar";
-
 export default function App() {
-	return (
-		<Router>
-			<Navbar />
-			<Routes>
-				<Route path="/" element={<Home />} />
-				<Route path="/create" element={<CreatePoll />} />
-
-				<Route path="/vote/:pollId" element={<VotePoll />} />
-				<Route path="/results/:pollId" element={<PollResults />} />	
-
-				<Route path="*" element={<div>404 – Page not found</div>} />
-			</Routes>
-		</Router>
-	);
+  return (
+    <>
+      <NavBar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/create" element={<CreatePoll />} />
+        <Route path="/poll/:pollId" element={<PollDetails />} />
+        <Route path="/vote/:pollId" element={<VotePoll />} />
+        <Route path="/results/:pollId" element={<PollResults />} />
+        <Route path="*" element={<Home />} />
+      </Routes>
+    </>
+  );
 }

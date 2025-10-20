@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { usePollSocket } from "../Hooks/usePollSocket";
-
-const API = import.meta.env.VITE_API_URL || "http://localhost:8080";
+import { API } from "../lib/api";
+import "../Styles/page-vote.css";
 
 export default function VotePoll() {
   const { pollId } = useParams();
@@ -47,11 +47,7 @@ export default function VotePoll() {
       const res = await fetch(`${API}/votes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          poll_id: pollId,
-          option_id: optionId,
-          session_id: sessionId
-        }),
+        body: JSON.stringify({ poll_id: pollId, option_id: optionId, session_id: sessionId }),
       });
       if (!res.ok) {
         const txt = await res.text();
@@ -62,33 +58,36 @@ export default function VotePoll() {
     }
   }
 
-  if (!pollId) return <p>Geen pollId in de URL.</p>;
-  if (!poll) return <p>Laden…</p>;
+  if (!pollId) return <main className="vote"><p>Geen pollId in de URL.</p></main>;
+  if (!poll)   return <main className="vote"><p>Laden…</p></main>;
 
   const total = series.reduce((a, b) => a + (b.count || 0), 0) || 1;
 
   return (
-    <div>
-      <h1>{poll.title} {poll.status === "live" ? "• LIVE" : ""}</h1>
+    <main className="vote">
+      <section className="vote__card">
+        <h1>{poll.title} {poll.status === "live" ? "• LIVE" : ""}</h1>
+        {error && <p className="form__error">{error}</p>}
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      <ul>
-        {series.map((s) => {
-          const pct = Math.round(((s.count || 0) / total) * 100);
-          return (
-            <li key={s.optionId}>
-              <button
-                onClick={() => vote(s.optionId)}
-                disabled={poll.status !== "live"}
-              >
-                {s.label}
-              </button>
-              <span> — {s.count ?? 0} • {pct}%</span>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+        <ul className="vote__options">
+          {series.map((s) => {
+            const pct = Math.round(((s.count || 0) / total) * 100);
+            return (
+              <li key={s.optionId} className="vote__row">
+                <button
+                  className="btn--primary"
+                  onClick={() => vote(s.optionId)}
+                  disabled={poll.status !== "live"}
+                  aria-disabled={poll.status !== "live"}
+                >
+                  {s.label}
+                </button>
+                <span className="vote__meta">{s.count ?? 0} • {pct}%</span>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    </main>
   );
 }

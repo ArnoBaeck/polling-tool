@@ -1,0 +1,6 @@
+.create { display: grid; place-items: start center; }
+.create__form { width: 100%; max-width: 720px; background: var(--panel); border: 1px solid var(--track); border-radius: 12px; padding: 20px; display: grid; gap: 16px; }
+.create__label { display: grid; gap: 6px; }
+.create__input { padding: 10px; border-radius: 8px; border: 1px solid var(--track); background: #0e1116; color: var(--text); width: 100%; }
+.create__options { display: grid; gap: 10px; }
+.create__option-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
