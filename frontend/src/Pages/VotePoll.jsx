@@ -63,10 +63,15 @@ export default function VotePoll() {
 
   const total = series.reduce((a, b) => a + (b.count || 0), 0) || 1;
 
+  function copyCode() {
+    navigator.clipboard.writeText(poll.id);
+  }
+
   return (
     <main className="vote">
       <section className="vote__card">
         <h1>{poll.title} {poll.status === "live" ? "• LIVE" : ""}</h1>
+        <p>Invite code: {poll.id} <button className="btn--primary" onClick={copyCode}>Kopieer</button></p>
         {error && <p className="form__error">{error}</p>}
 
         <ul className="vote__options">
